@@ -19,6 +19,8 @@ Patch1:		%{name}-e4bdac2f-remove-hflip.patch
 Patch2:		%{name}-e4bdac2f-ffmpeg2.patch
 
 BuildRequires:	ant
+BuildRequires:	cpptasks
+BuildRequires:	javapackages-local
 BuildRequires:	maven-local
 BuildRequires:	mvn(net.java.dev.jna:jna)
 BuildRequires:	mvn(org.apache.felix:maven-bundle-plugin)
