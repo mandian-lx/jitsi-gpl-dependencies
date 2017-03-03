@@ -8,7 +8,7 @@
 Summary:	Jitsi dependencies released under LGPL license
 Name:		jitsi-gpl-dependencies
 Version:	0
-Release:	0
+Release:	1
 License:	GPLv2
 Group:		Development/Java
 Url:		https://github.com/jitsi/%{name}
