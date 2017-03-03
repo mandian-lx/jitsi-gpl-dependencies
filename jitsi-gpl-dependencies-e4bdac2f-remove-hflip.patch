@@ -1,0 +1,219 @@
+Adapted from libjitsi/resources/install/debian/patches/remove-hflip
+
+Description: Removes hflip, filters internal api availbale in ffmpeg but not in libav
+--- jitsi-gpl-dependencies/src/main/c/org/jitsi/impl/neomedia/codec/FFmpeg.c.orig
++++ jitsi-gpl-dependencies/src/main/c/org/jitsi/impl/neomedia/codec/FFmpeg.c
+@@ -18,10 +18,10 @@
+ #include <libavfilter/avfiltergraph.h>
+ #include <libavfilter/buffersrc.h>
+ 
+-#ifndef _JITSI_LIBAV_
+-#include <libavfilter/formats.h> /* ff_default_query_formats, ff_make_format_list, ff_set_common_formats */
+-#include <libavfilter/internal.h> /* ff_request_frame */
+-#endif
++//#ifndef _JITSI_LIBAV_
++//#include <libavfilter/formats.h> /* ff_default_query_formats, ff_make_format_list, ff_set_common_formats */
++//#include <libavfilter/internal.h> /* ff_request_frame */
++//#endif
+ 
+ #include <libswscale/swscale.h>
+ 
+@@ -569,7 +585,7 @@
+ DEFINE_AVCODECCONTEXT_I_PROPERTY_SETTER(trellis, trellis)
+ DEFINE_AVCODECCONTEXT_I_PROPERTY_SETTER(workaround_1bugs, workaround_bugs)
+ 
+-JNIEXPORT jlong JNICALL
++/*JNIEXPORT jlong JNICALL
+ Java_org_jitsi_impl_neomedia_codec_FFmpeg_avfilter_1graph_1alloc
+     (JNIEnv *env, jclass clazz)
+ {
+@@ -632,7 +648,7 @@
+     AVFilterContext *src = ctx;
+     int err;
+ 
+-    /* Find buffer. */
++    / * Find buffer. * /
+ #ifdef _JITSI_LIBAV_
+     while (src && src->input_count && src->inputs)
+ #else
+@@ -647,7 +663,7 @@
+             break;
+     }
+ 
+-    /* Make ffsink output in the format in which buffer inputs. */
++    / * Make ffsink output in the format in which buffer inputs. * /
+     if (src)
+     {
+         const int pix_fmts[] = { src->outputs[0]->in_formats->formats[0], -1 };
+@@ -696,26 +712,26 @@
+                     (AVFilterInOut **) (intptr_t) outputs,
+                     (AVClass *) (intptr_t) log_ctx);
+ 
+-        /*
++       / *
+          * FIXME The implementation at the time of this writing presumes that
+          * the first filter is buffer, the last filter is nullsink meant to be
+          * ffsink and the ffsink is expected to output in the format in which
+          * the buffer inputs.
+-         */
++         * /
+         if (0 == ret)
+         {
+-            /* Turn nullsink into ffsink. */
++            / * Turn nullsink into ffsink. * /
+             unsigned filterCount = graph_->filter_count;
+ 
+             if (filterCount)
+             {
+                 AVFilterContext *ffsink = graph_->filters[filterCount - 1];
+ 
+-                /*
++               / *
+                  * Make sure query_format of ffsink outputs in the format in
+                  * which buffer inputs. Otherwise, the output format may end up
+                  * different on the C and Java sides.
+-                 */
++                 * /
+                 ffsink->filter->uninit = ffsink_uninit;
+                 ffsink->priv = NULL;
+                 ffsink->filter->query_formats = ffsink_query_formats;
+@@ -745,7 +761,7 @@
+     (JNIEnv *env, jclass clazz, jlong ref)
+ {
+     avfilter_unref_buffer((AVFilterBufferRef *) (intptr_t) ref);
+-}
++}*/
+ 
+ /*
+  * Class:     org_jitsi_impl_neomedia_codec_FFmpeg
+@@ -879,7 +895,7 @@
+                     (int) width, (int) height);
+ }
+ 
+-JNIEXPORT jlong JNICALL
++/*JNIEXPORT jlong JNICALL
+ Java_org_jitsi_impl_neomedia_codec_FFmpeg_get_1filtered_1video_1frame
+     (JNIEnv *env, jclass clazz, jlong input, jint width, jint height,
+         jint pixFmt, jlong buffer, jlong ffsink, jlong output)
+@@ -902,12 +918,12 @@
+             {
+                 AVFrame *output_ = (AVFrame *) (intptr_t) output;
+ 
+-                /*
++               / *
+                  * The data of cur_buf will be returned into output so it needs
+                  * to exist at least while output needs it. So take ownership of
+                  * cur_buf and the user of output will unref it when they are
+                  * done with output.
+-                 */
++                 * /
+                 ffsink_->priv = NULL;
+ 
+                 memcpy(output_->data, ref->data, sizeof(output_->data));
+@@ -921,7 +937,7 @@
+         }
+     }
+     return (jlong) (intptr_t) ref;
+-}
++}*/
+ 
+ /*
+  * Class:     org_jitsi_impl_neomedia_codec_FFmpeg
+--- jitsi-gpl-dependencies-e4bdac2ff0235c1a96736430b50a5b8ad0b01eca/src/main/java/org/jitsi/impl/neomedia/codec/FFmpeg.java.hflip
++++ jitsi-gpl-dependencies-e4bdac2ff0235c1a96736430b50a5b8ad0b01eca/src/main/java/org/jitsi/impl/neomedia/codec/FFmpeg.java
+@@ -229,7 +229,7 @@
+ 
+         av_register_all();
+         avcodec_register_all();
+-        avfilter_register_all();
++     /* avfilter_register_all(); */
+ 
+         PIX_FMT_BGR32 = PIX_FMT_BGR32();
+         PIX_FMT_BGR32_1 = PIX_FMT_BGR32_1();
+@@ -641,14 +641,14 @@
+     public static native void avcodeccontext_set_workaround_bugs(long ctx,
+         int workaround_bugs);
+ 
+-    /**
++    /*
+      * Allocates a new <tt>AVFilterGraph</tt> instance.
+      *
+      * @return a pointer to the newly-allocated <tt>AVFilterGraph</tt> instance
+-     */
++     * /
+     public static native long avfilter_graph_alloc();
+ 
+-    /**
++   / *
+      * Checks the validity and configures all the links and formats in a
+      * specific <tt>AVFilterGraph</tt> instance.
+      *
+@@ -656,17 +656,17 @@
+      * the validity of and configure
+      * @param log_ctx the <tt>AVClass</tt> context to be used for logging
+      * @return <tt>0</tt> on success; a negative <tt>AVERROR</tt> on error
+-     */
++     * /
+     public static native int avfilter_graph_config(long graph, long log_ctx);
+ 
+-    /**
++   / *
+      * Frees a specific <tt>AVFilterGraph</tt> instance and destroys its links.
+      *
+      * @param graph a pointer to the <tt>AVFilterGraph</tt> instance to free
+-     */
++     * /
+     public static native void avfilter_graph_free(long graph);
+ 
+-    /**
++   / *
+      * Gets a pointer to an <tt>AVFilterContext</tt> instance with a specific
+      * name in a specific <tt>AVFilterGraph</tt> instance.
+      *
+@@ -675,12 +675,12 @@
+      * @param name the name of the <tt>AVFilterContext</tt> instance which is to
+      * be found in the specified <tt>graph</tt>
+      * @return the filter graph pointer
+-     */
++     * /
+     public static native long avfilter_graph_get_filter(
+             long graph,
+             String name);
+ 
+-    /**
++   / *
+      * Adds a filter graph described by a <tt>String</tt> to a specific
+      * <tt>AVFilterGraph</tt> instance.
+      *
+@@ -693,25 +693,25 @@
+      * any; otherwise, <tt>0</tt>
+      * @param log_ctx the <tt>AVClass</tt> context to be used for logging
+      * @return <tt>0</tt> on success; a negative <tt>AVERROR</tt> on error
+-     */
++     * /
+     public static native int avfilter_graph_parse(
+             long graph,
+             String filters, long inputs, long outputs, long log_ctx);
+ 
+-    /**
++   / *
+      * Initializes the <tt>libavfilter</tt> system and registers all built-in
+      * filters.
+-     */
++     * /
+     public static native void avfilter_register_all();
+ 
+-    /**
++   / *
+      * Removes a reference to a buffer. If the specified
+      * <tt>AVFilterBufferRef</tt> is the last reference to the buffer, the
+      * buffer is also automatically freed.
+      *
+      * @param ref a pointer to the <tt>AVFilterBufferRef</tt> instance to remove
+-     */
+-    public static native void avfilter_unref_buffer(long ref);
++     * /
++    public static native void avfilter_unref_buffer(long ref); */
+ 
+     public static native long avframe_get_data0(long frame);
+ 

@@ -1,0 +1,11 @@
+--- jitsi-gpl-dependencies/src/native/build.xml.orig
++++ jitsi-gpl-dependencies/src/native/build.xml
+@@ -200,7 +200,7 @@
+         Static libraries MUST be at the end otherwise they will not be added to
+         the shared library.
+       -->
+-      <linkerarg value="-Wl,-Bstatic" location="end" unless="LIBAV"/>
++      <!--linkerarg value="-Wl,-Bstatic" location="end" unless="LIBAV"/-->
+       <linkerarg value="-lavformat" location="end" />
+       <linkerarg value="-lavcodec" location="end" />
+       <linkerarg value="-lavfilter" location="end" />
